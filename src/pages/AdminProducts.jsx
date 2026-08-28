@@ -3,12 +3,14 @@ import {
   getProducts,
   createProduct,
   deleteProduct,
+  updateProduct,
 } from "../services/productService";
 import { getCategories } from "../services/categoryService";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -92,6 +94,54 @@ export default function AdminProducts() {
     }
   };
 
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+
+    setForm({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      imageUrl: product.imageUrl,
+      categoryId: product.categoryId,
+    });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const updatedProduct = await updateProduct(editingProduct.id, {
+        ...form,
+        price: Number(form.price),
+        stock: Number(form.stock),
+      });
+
+      setProducts(
+        products.map((product) =>
+          product.id === updatedProduct.id ? updatedProduct : product,
+        ),
+      );
+
+      setEditingProduct(null);
+
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        stock: "",
+        imageUrl: "",
+        categoryId: "",
+      });
+    } catch (error) {
+      console.error(error);
+      setError(
+        error.response?.data?.message || "No se pudo actualizar el producto",
+      );
+    }
+  };
+
   if (loading) {
     return <p>Cargando...</p>;
   }
@@ -102,9 +152,9 @@ export default function AdminProducts() {
 
       {error && <p>{error}</p>}
 
-      <h2>Crear producto</h2>
+      <h2>{editingProduct ? "Editar producto" : "Crear producto"} </h2>
 
-      <form onSubmit={handleCreate}>
+      <form onSubmit={editingProduct ? handleUpdate : handleCreate}>
         <input
           name="name"
           placeholder="Nombre"
@@ -156,7 +206,27 @@ export default function AdminProducts() {
           ))}
         </select>
 
-        <button type="submit">Crear producto</button>
+        <button type="submit">
+          {editingProduct ? "Guardar cambios" : "Crear Producto"}
+        </button>
+        {editingProduct && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingProduct(null);
+              setForm({
+                name: "",
+                description: "",
+                price: "",
+                stock: "",
+                imageUrl: "",
+                categoryId: "",
+              });
+            }}
+          >
+            Cancelar
+          </button>
+        )}
       </form>
 
       <h2>Productos</h2>
@@ -170,7 +240,7 @@ export default function AdminProducts() {
           <p>Stock: {product.stock}</p>
 
           <button onClick={() => handleDelete(product.id)}>Desactivar</button>
-
+          <button onClick={() => handleEdit(product)}>Editar</button>
           <hr />
         </div>
       ))}

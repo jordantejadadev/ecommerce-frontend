@@ -10,6 +10,7 @@ import OrderDetail from "../pages/OrderDetail";
 import Addresses from "../pages/Addresses";
 import AdminRoute from "./AdminRoute";
 import AdminProducts from "../pages/AdminProducts";
+import AdminCategories from "../pages/AdminCategories";
 
 function Home() {
   return <h1>Home</h1>;
@@ -37,6 +38,7 @@ export default function AppRoutes() {
 
         <Route element={<AdminRoute />}>
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
         </Route>
       </Routes>
     </BrowserRouter>
