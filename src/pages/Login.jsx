@@ -1,28 +1,25 @@
 import { useState } from "react";
 import { login } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+
+  const {login} = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setError("");
 
     try {
       const data = await login(email, password);
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          userId: data.userId,
-          name: data.name,
-          email: data.email,
-        }),
-      );
-      console.log(data);
+      
+      console.log("Login: ", data);
+      
     } catch (error) {
       if (error.response?.status === 401) {
         setError("Credenciales inválidas");
