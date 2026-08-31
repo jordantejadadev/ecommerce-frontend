@@ -52,25 +52,56 @@ export default function Products() {
   }
 
   return (
-    <div>
-      <h1>Productos</h1>
-      {products.map((product) => (
-        <div key={product.id}>
-          <h2>{product.name}</h2>
-          <p>{product.description}</p>
-          <p>S/. {product.price}</p>
-          <p>Stock: {product.stock}</p>
-          {user ? (
-            <button onClick={() => handleAddToCart(product.id)}>
-              Agregar al carrito
-            </button>
-          ) : (
-            <button onClick={() => navigate("/login")}>
-              Iniciar sesión para comprar
-            </button>
-          )}
-        </div>
-      ))}
+    <div className="min-h-screen bg-gray-100 px-6 py-10">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900">Productos</h1>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <div
+            key={product.id}
+            className="overflow-hidden rounded-xl bg-white shadow-md transition hover:-translate-y-1 hover:shadow-lg"
+          >
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="h-56 w-full object-cover"
+            />
+            <div className="p-5">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {product.name}
+              </h2>
+              <p className="mt-2 text-sm text-gray-600">
+                {product.description}
+              </p>
+              <p className="mt-2 text-2xl font-bold text-gray-900">
+                S/. {product.price}
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                Stock: {product.stock}
+              </p>
+              <div className="mt-5">
+                {user ? (
+                  <button
+                    onClick={() => handleAddToCart(product.id)}
+                    className="w-full rounded-lg bg-black px-4 py-2.5 font-medium text-white transition hover:bg-gray-800"
+                  >
+                    Agregar al carrito
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 font-medium text-gray-700 transition hover:bg-gray-100"
+                  >
+                    Iniciar sesión para comprar
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      </div>
+      
     </div>
   );
 }

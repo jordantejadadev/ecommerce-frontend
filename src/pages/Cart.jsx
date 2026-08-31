@@ -68,47 +68,111 @@ export default function Cart() {
   }
 
   return (
-    <div>
-      <h1>Mi carrito</h1>
+    <div className="min-h-screen bg-gray-100 px-6 py-10">
+      <div className="mx-auto max-w-5xl">
+        <h1 className="mb-8 text-3xl font-bold text-gray-900">Mi carrito</h1>
 
-      {cart.items.length === 0 ? (
-        <p>Tu carrito está vacío</p>
-      ) : (
-        <>
-          {cart.items.map((item) => (
-            <div key={item.productId}>
-              <h2>{item.productName}</h2>
-              <p>Precio: S/. {item.price}</p>
-              <div>
-                <button
-                  onClick={() =>
-                    handleUpdateQuantity(item.productId, item.quantity - 1)
-                  }
-                  disabled={item.quantity === 1}
-                >
-                  -
-                </button>
-                <span>{item.quantity}</span>
-                <button
-                  onClick={() =>
-                    handleUpdateQuantity(item.productId, item.quantity + 1)
-                  }
-                >
-                  +
-                </button>
-              </div>
+        {cart.items.length === 0 ? (
+          <div className="rounded-xl bg-white p-8 text-center shadow">
+            <p className="text-lg text-gray-600">Tu carrito está vacío</p>
 
-              <p>Subtotal: S/. {item.subtotal}</p>
-              <button onClick={() => handleRemoveItem(item.productId)}>
-                Eliminar
+            <Link
+              to="/products"
+              className="mt-6 inline-block rounded-lg bg-black px-5 py-2.5 font-medium text-white transition hover:bg-gray-800"
+            >
+              Ver productos
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-8 lg:grid-cols-3">
+            {/* Productos */}
+            <div className="space-y-4 lg:col-span-2">
+              {cart.items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="rounded-xl bg-white p-5 shadow"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {item.productName}
+                      </h2>
+
+                      <p className="mt-1 text-gray-500">S/. {item.price}</p>
+
+                      <p className="mt-2 font-medium text-gray-800">
+                        Subtotal: S/. {item.subtotal}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => handleRemoveItem(item.productId)}
+                      className="text-sm text-red-600 transition hover:text-red-800"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+
+                  {/* Cantidad */}
+                  <div className="mt-5 flex items-center gap-3">
+                    <button
+                      onClick={() =>
+                        handleUpdateQuantity(item.productId, item.quantity - 1)
+                      }
+                      disabled={item.quantity === 1}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      −
+                    </button>
+
+                    <span className="min-w-8 text-center font-medium">
+                      {item.quantity}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        handleUpdateQuantity(item.productId, item.quantity + 1)
+                      }
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={handleClearCart}
+                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                Vaciar carrito
               </button>
             </div>
-          ))}
-          <h2>Total: S/. {cart.total}</h2>
-          <Link to="/checkout">Ir al checkout</Link>
-          <button onClick={() => handleClearCart()}>Vaciar carrito</button>          
-        </>
-      )}
+
+            {/* Resumen */}
+            <div className="h-fit rounded-xl bg-white p-6 shadow">
+              <h2 className="text-xl font-semibold text-gray-900">Resumen</h2>
+
+              <div className="mt-6 flex justify-between text-gray-600">
+                <span>Productos</span>
+                <span>{cart.items.length}</span>
+              </div>
+
+              <div className="mt-3 flex justify-between border-t pt-4 text-lg font-bold text-gray-900">
+                <span>Total</span>
+                <span>S/. {cart.total}</span>
+              </div>
+
+              <Link
+                to="/checkout"
+                className="mt-6 block rounded-lg bg-black px-4 py-3 text-center font-medium text-white transition hover:bg-gray-800"
+              >
+                Ir al checkout
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

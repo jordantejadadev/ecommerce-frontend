@@ -13,7 +13,7 @@ import AdminProducts from "../pages/AdminProducts";
 import AdminCategories from "../pages/AdminCategories";
 
 function Home() {
-  return <h1>Home</h1>;
+  return <h1 className="text-red-700 text-8xl">Home</h1>;
 }
 
 export default function AppRoutes() {
