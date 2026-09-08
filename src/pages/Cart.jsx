@@ -60,15 +60,23 @@ export default function Cart() {
   };
 
   if (loading) {
-    return <p>Cargando carrito...</p>;
+    return (
+      <div className="flex flex-1 items-center justify-center px-6 py-10">
+        <p className="text-gray-600">Cargando carrito...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return (
+      <div className="flex flex-1 items-center justify-center px-6 py-10">
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-10">
+    <div className="flex-1 px-6 py-10">
       <div className="mx-auto max-w-5xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Mi carrito</h1>
 

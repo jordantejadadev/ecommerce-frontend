@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Añade esto al final o al inicio */
+html {
+    scrollbar-gutter: stable;
+}
