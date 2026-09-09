@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
     const data = await loginRequest(email, password);
 
     localStorage.setItem("token", data.token);
+    localStorage.setItem("refreshToken", data.refreshToken);
 
     const userData = {
       userId: data.userId,
@@ -36,7 +37,8 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");    
 
     setToken(null);
     setUser(null);
