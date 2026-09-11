@@ -56,6 +56,10 @@ export default function Navbar() {
                     >
                       Admin Categories
                     </Link>
+                    <Link
+                      to="/admin/users"
+                      className="text-gray-700 hover:text-black"
+                    >Admin Users</Link>
                   </>
                 )}
                 <span className="text-sm font-medium text-gray-900">
@@ -137,6 +141,13 @@ export default function Navbar() {
                       >
                         Admin Categorías
                       </Link>
+                      <Link
+                        to="/admin/users"
+                        onClick={() => setMenuOpen(false)}
+                        className="text-gray-700 hover:text-black"
+                      >
+                        Admin Users
+                      </Link>
                     </>
                   )}
 
@@ -154,7 +165,11 @@ export default function Navbar() {
               )}
 
               {!user && (
-                <Link to="/login" onClick={() => setMenuOpen(false)} className="w-fit rounded-lg bg-black px-4 py-2 text-sm font-medium text-white">
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-fit rounded-lg bg-black px-4 py-2 text-sm font-medium text-white"
+                >
                   Iniciar sesión
                 </Link>
               )}
@@ -164,5 +179,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-
 }

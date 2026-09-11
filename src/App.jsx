@@ -12,6 +12,9 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminCategories from "./pages/AdminCategories";
 import Home from "./pages/Home";
 import Layout from "./components/Layout";
+import AdminUsers from "./pages/AdminUsers";
+import Register from "./pages/Register";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -22,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/register" element={<Register />} />
 
           {/* Protegidas */}
           <Route element={<ProtectedRoute />}>
@@ -36,7 +40,10 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
           </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

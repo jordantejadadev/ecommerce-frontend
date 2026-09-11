@@ -5,11 +5,42 @@ import HeroCarousel from "../components/HeroCarousel";
 
 export default function Home() {
   const [featured, setFeatured] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getProducts()
-      .then((data) => setFeatured(data.slice(0, 4)))
-      .catch(() => setFeatured([]));
+    const controller = new AbortController();
+
+    const loadProducts = async () => {
+      try {
+        setError("");
+        setLoading(true);
+
+        const data = await getProducts({ signal: controller.signal});
+
+        setFeatured(Array.isArray(data) ? data.slice(0, 4) : []);
+      } catch (error) {
+
+        if(error.name === "CanceledError" || error.name === "AbortError") {
+          return;
+        }
+
+        setError(
+          error?.response?.data?.message ||
+            "Ocurrió un error al cargar productos",
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      controller.abort();
+    }
   }, []);
 
   return (
@@ -65,14 +96,24 @@ export default function Home() {
       <section className="px-4 py-14">
         <div className="mx-auto max-w-7xl">
           <h2 className="mb-8 text-2xl font-bold text-gray-900">Destacados</h2>
-          {featured.length === 0 ? (
+          {loading ? (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-40 animate-pulse rounded-xl bg-gray-200"
-                />
+                  className="overflow-hidden rounded-xl border border-gray-200"
+                >
+                  <div className="h-40 w-full animate-pulse bg-gray-200" />
+                  <div className="space-y-2 p-3">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    <div className="h-4 w-1/3 animate-pulse rounded bg-gray-200" />
+                  </div>
+                </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-start  py-2 ">
+              <p className="text-red-600 text-sm font-semibold">{error}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
