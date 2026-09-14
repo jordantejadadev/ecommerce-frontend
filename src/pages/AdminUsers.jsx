@@ -115,7 +115,7 @@ export default function AdminUsers() {
                           user.role === "ADMIN" ? "USER" : "ADMIN",
                         )
                       }
-                      className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 disabled:opacity-50"
+                      className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {updatingId === user.id
                         ? "Actualizando..."

@@ -13,6 +13,14 @@ export default function AdminProducts() {
   const [categories, setCategories] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [pagination, setPagination] = useState({
+    totalPages: 0,
+    first: true,
+    last: false,
+  });
+  const [isFetching, setIsFetching] = useState(false);
+  const [page, setPage] = useState(1);
+  const limit = 4;
 
   const [form, setForm] = useState({
     name: "",
@@ -29,24 +37,50 @@ export default function AdminProducts() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    const loadData = async () => {
+      setIsFetching(true);
+
+      try {
+        setError("");
+
+        const [productsData, categoriesData] = await Promise.all([
+          getProducts({ page, limit, signal: controller.signal }),
+          getCategories(),
+        ]);
+
+        setProducts(productsData.content);
+        setPagination({
+          totalPages: productsData.totalPages,
+          first: productsData.first,
+          last: productsData.last,
+        });
+        setCategories(categoriesData);
+      } catch (error) {
+        // if (!axios.isCancel(error)) {
+        //   setError("No se pudieron cargar los datos");
+        // }
+      } finally {
+        setLoading(false);
+        setIsFetching(false);
+      }
+    };
+
     loadData();
-  }, []);
 
-  const loadData = async () => {
-    try {
-      setError("");
+    return () => controller.abort();
+  }, [page]);
 
-      const [productsData, categoriesData] = await Promise.all([
-        getProducts(),
-        getCategories(),
-      ]);
+  const handlePrev = () => {
+    if (!pagination.first && !isFetching) {
+      setPage((prev) => prev - 1);
+    }
+  };
 
-      setProducts(productsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      setError("No se pudieron cargar los datos");
-    } finally {
-      setLoading(false);
+  const handleNext = () => {
+    if (!pagination.last && !isFetching) {
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -326,7 +360,7 @@ export default function AdminProducts() {
                 <button
                   type="submit"
                   disabled={uploading}
-                  className="flex-1 rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  className="flex-1 rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {uploading
                     ? "Subiendo imagen..."
@@ -339,7 +373,7 @@ export default function AdminProducts() {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="rounded-lg border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-100"
+                    className="rounded-lg border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -349,7 +383,7 @@ export default function AdminProducts() {
           </section>
 
           {/* Lista de productos */}
-          <section className="rounded-xl bg-white p-6 shadow-md lg:col-span-2">
+          <section className="flex flex-col rounded-xl bg-white p-6 shadow-md lg:col-span-2 min-h-[520px]">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-800">Productos</h2>
 
@@ -363,66 +397,89 @@ export default function AdminProducts() {
             ) : products.length === 0 ? (
               <p className="text-gray-500">No hay productos registrados.</p>
             ) : (
-              <div className="space-y-4">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex flex-col gap-4 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="flex min-w-0 items-center gap-4">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="h-16 w-16 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
-                          Sin imagen
-                        </div>
-                      )}
+              <>
+                {/* El contenedor flex-1 empuja el paginador hacia abajo cuando hay pocos elementos */}
+                <div className="flex-1 space-y-4">
+                  {products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex flex-col gap-4 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex min-w-0 items-center gap-4">
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="h-16 w-16 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-gray-200 text-xs text-gray-500">
+                            Sin imagen
+                          </div>
+                        )}
 
-                      <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-gray-800">
-                          {product.name}
-                        </h3>
+                        <div className="min-w-0">
+                          <h3 className="truncate font-semibold text-gray-800">
+                            {product.name}
+                          </h3>
 
-                        <p className="text-sm text-gray-500">
-                          {categories.find(
-                            (category) => category.id === product.categoryId,
-                          )?.name || "Sin categoría"}
-                        </p>
+                          <p className="text-sm text-gray-500">
+                            {categories.find(
+                              (category) => category.id === product.categoryId,
+                            )?.name || "Sin categoría"}
+                          </p>
 
-                        <div className="mt-1 flex flex-wrap gap-3 text-sm">
-                          <span className="font-medium text-gray-800">
-                            S/ {product.price}
-                          </span>
+                          <div className="mt-1 flex flex-wrap gap-3 text-sm">
+                            <span className="font-medium text-gray-800">
+                              S/ {product.price}
+                            </span>
 
-                          <span className="text-gray-500">
-                            Stock: {product.stock}
-                          </span>
+                            <span className="text-gray-500">
+                              Stock: {product.stock}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
-                      >
-                        Editar
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 cursor-pointer"
+                        >
+                          Editar
+                        </button>
 
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                      >
-                        Eliminar
-                      </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 cursor-pointer"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+                {/* Paginador anclado con mt-auto */}
+                {!loading && !error && pagination.totalPages > 1 && (
+                  <div className="mt-auto pt-6 flex items-center justify-center gap-4">
+                    <button
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={handlePrev}
+                      disabled={pagination.first || isFetching}
+                    >
+                      Anterior
+                    </button>
+                    <span className="text-sm font-medium text-gray-700">{`Pagina ${page} de ${pagination.totalPages}`}</span>
+                    <button
+                      disabled={pagination.last || isFetching}
+                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={handleNext}
+                    >
+                      Siguiente
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </section>
         </div>

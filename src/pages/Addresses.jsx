@@ -173,6 +173,7 @@ export default function Addresses() {
                 <input
                   id="state"
                   type="text"
+                  name="state"
                   value={form.state}
                   onChange={handleChange}
                   required
@@ -215,7 +216,7 @@ export default function Addresses() {
               </div>
               <button
                 type="submit"
-                className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+                className="w-full rounded-lg bg-black py-3 font-semibold text-white transition hover:bg-gray-800 cursor-pointer"
               >
                 Agregar dirección
               </button>

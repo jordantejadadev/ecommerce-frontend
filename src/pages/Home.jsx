@@ -16,9 +16,9 @@ export default function Home() {
         setError("");
         setLoading(true);
 
-        const data = await getProducts({ signal: controller.signal});
+        const data = await getProducts({page: 0, limit: 4, signal: controller.signal});        
 
-        setFeatured(Array.isArray(data) ? data.slice(0, 4) : []);
+        setFeatured(Array.isArray(data.content) ? data.content : []);
       } catch (error) {
 
         if(error.name === "CanceledError" || error.name === "AbortError") {
@@ -120,7 +120,7 @@ export default function Home() {
               {featured.map((product) => (
                 <Link
                   key={product.id}
-                  to="/products"
+                  to={`/products/${product.id}`}
                   className="group overflow-hidden rounded-xl border border-gray-200 transition hover:shadow-md"
                 >
                   {product.imageUrl ? (

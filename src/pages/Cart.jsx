@@ -115,7 +115,7 @@ export default function Cart() {
 
                     <button
                       onClick={() => handleRemoveItem(item.productId)}
-                      className="text-sm text-red-600 transition hover:text-red-800"
+                      className="text-sm text-red-600 transition hover:text-red-800 cursor-pointer"
                     >
                       Eliminar
                     </button>
@@ -128,7 +128,7 @@ export default function Cart() {
                         handleUpdateQuantity(item.productId, item.quantity - 1)
                       }
                       disabled={item.quantity === 1}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       −
                     </button>
@@ -141,7 +141,7 @@ export default function Cart() {
                       onClick={() =>
                         handleUpdateQuantity(item.productId, item.quantity + 1)
                       }
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       +
                     </button>
@@ -151,7 +151,7 @@ export default function Cart() {
 
               <button
                 onClick={handleClearCart}
-                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 cursor-pointer"
               >
                 Vaciar carrito
               </button>

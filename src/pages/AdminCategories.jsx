@@ -137,7 +137,7 @@ export default function AdminCategories() {
               <div className="flex gap-3">
                 <button
                   type="submit"
-                  className="flex-1 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  className="flex-1 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 cursor-pointer"
                 >
                   {editingCategory ? "Guardar cambios" : "Crear categoría"}
                 </button>
@@ -146,7 +146,7 @@ export default function AdminCategories() {
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="rounded-lg border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-100"
+                    className="rounded-lg border border-gray-300 px-4 py-3 font-semibold text-gray-700 transition hover:bg-gray-100 cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -177,14 +177,14 @@ export default function AdminCategories() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEdit(category)}
-                        className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+                        className="rounded-lg border border-blue-300 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 cursor-pointer"
                       >
                         Editar
                       </button>
 
                       <button
                         onClick={() => handleDelete(category.id)}
-                        className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                        className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 cursor-pointer"
                       >
                         Eliminar
                       </button>

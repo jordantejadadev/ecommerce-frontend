@@ -15,16 +15,18 @@ import Layout from "./components/Layout";
 import AdminUsers from "./pages/AdminUsers";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import ProductDetail from "./pages/ProductDetail";
 
 function App() {
   return (
-    <BrowserRouter>      
+    <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
           {/* Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:productId" element={<ProductDetail />} />
           <Route path="/register" element={<Register />} />
 
           {/* Protegidas */}
