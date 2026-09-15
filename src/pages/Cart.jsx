@@ -141,6 +141,7 @@ export default function Cart() {
                       onClick={() =>
                         handleUpdateQuantity(item.productId, item.quantity + 1)
                       }
+                      disabled={item.quantity >= item.stock}
                       className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-lg transition hover:bg-gray-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       +
