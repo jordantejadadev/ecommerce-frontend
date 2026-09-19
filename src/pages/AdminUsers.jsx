@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAllUsers, updateUserRole } from "../services/adminUserService";
+import { toast } from "sonner";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -7,6 +9,7 @@ export default function AdminUsers() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [updatingId, setUpdatingId] = useState(null);
+  const [pendingChange, setPendingChange] = useState(null);
 
   useEffect(() => {
     loadUsers();
@@ -14,45 +17,68 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
-      setError("");
       const data = await getAllUsers();
       setUsers(data);
     } catch (error) {
-      setError("No se pudieron cargar los usuarios");
+      toast.error("No se pudieron cargar los usuarios");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRoleChange = async (userId, newRole) => {
-    const confirmed = window.confirm(
-      `¿Seguro que deseas cambiar este usuario a ${newRole}?`,
-    );
+  // Ahora solo ABRE el modal, no ejecuta el cambio todavía
+  const handleRoleChange = (userId, newRole) => {
+    setPendingChange({ userId, newRole });
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  // Esto se ejecuta cuando el usuario confirma en el modal
+  const confirmRoleChange = async () => {
+    const { userId, newRole } = pendingChange;
 
     try {
-      setError("");
-      setMessage("");
       setUpdatingId(userId);
+      setPendingChange(null); // cierra el modal
 
       const updatedUser = await updateUserRole(userId, newRole);
 
       setUsers((prev) =>
         prev.map((user) => (user.id === userId ? updatedUser : user)),
       );
-
-      setMessage("Rol actualizado correctamente");
+      toast.success("Rol actualizado correctamente");
     } catch (error) {
-      setError(
+      toast.error(
         error.response?.data?.message || "No se pudo actualizar el rol",
       );
     } finally {
       setUpdatingId(null);
     }
-  };
+  };  
+  //   const confirmed = window.confirm(
+  //     `¿Seguro que deseas cambiar este usuario a ${newRole}?`,
+  //   );
+
+  //   if (!confirmed) {
+  //     return;
+  //   }
+
+  //   try {
+  //     setUpdatingId(userId);
+
+  //     const updatedUser = await updateUserRole(userId, newRole);
+
+  //     setUsers((prev) =>
+  //       prev.map((user) => (user.id === userId ? updatedUser : user)),
+  //     );
+
+  //     toast.success("Rol actualizado correctamente");
+  //   } catch (error) {
+  //     toast.error(
+  //       error.response?.data?.message || "No se pudo actualizar el rol",
+  //     );
+  //   } finally {
+  //     setUpdatingId(null);
+  //   }
+  // };
 
   return (
     <div className="flex-1 px-6 py-10">
@@ -61,22 +87,8 @@ export default function AdminUsers() {
           Administrar usuarios
         </h1>
 
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-6 rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-green-700">
-            {message}
-          </div>
-        )}
-
         <section className="rounded-xl bg-white p-6 shadow-md">
-          <h2 className="mb-5 text-xl font-semibold text-gray-800">
-            Usuarios
-          </h2>
+          <h2 className="mb-5 text-xl font-semibold text-gray-800">Usuarios</h2>
 
           {loading ? (
             <p className="text-gray-500">Cargando usuarios...</p>
@@ -90,9 +102,7 @@ export default function AdminUsers() {
                   className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
-                    <h3 className="font-medium text-gray-800">
-                      {user.name}
-                    </h3>
+                    <h3 className="font-medium text-gray-800">{user.name}</h3>
                     <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
 
@@ -130,6 +140,18 @@ export default function AdminUsers() {
           )}
         </section>
       </div>
+
+      <ConfirmModal
+        open={pendingChange !== null}
+        title="Cambiar rol"
+        message={
+          pendingChange &&
+          `¿Seguro que deseas cambiar este usuario a ${pendingChange.newRole}?`
+        }
+        confirmText="Sí, cambiar"
+        onConfirm={confirmRoleChange}
+        onCancel={() => setPendingChange(null)}
+      />
     </div>
   );
 }

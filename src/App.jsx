@@ -16,10 +16,12 @@ import AdminUsers from "./pages/AdminUsers";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
+import { Toaster } from "sonner";
 
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-right" richColors />
       <Routes>
         <Route element={<Layout />}>
           {/* Públicas */}

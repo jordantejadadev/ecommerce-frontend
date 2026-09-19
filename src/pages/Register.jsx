@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createUser } from "../services/userService";
+import { toast } from "sonner";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function Register() {
       setLoading(true);
 
       await createUser(form.name, form.email, form.password);
-
+      toast.success("Usuario regitrado");
       navigate("/login");
     } catch (error) {
       setError(

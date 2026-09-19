@@ -3,6 +3,7 @@ import { getCart } from "../services/cartService";
 import { getAddresses } from "../services/addressService";
 import { createOrder } from "../services/orderService";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Checkout() {
   const [cart, setCart] = useState(null);
@@ -22,8 +23,7 @@ export default function Checkout() {
         setCart(cartData);
         setAddresses(addressData);
       } catch (error) {
-        console.error(error);
-        setError("No se pudo cargar el checkout");
+        toast.error("No se pudo cargar el checkout");
       } finally {
         setLoading(false);
       }
@@ -40,27 +40,19 @@ export default function Checkout() {
 
     try {
       const order = await createOrder(selectedAddressId);
-
-      console.log("Order creada: ", order);
-
+      toast.success("Orden creada");
       navigate("/orders");
     } catch (error) {
-      console.error(error);
-
       if (error.response?.status === 400) {
-        setError(error.response.data.message);
+        toast.error(error.response.data.message);
       } else {
-        setError("No se pudo crear la orden");
+        toast.error("No se pudo crear la orden");
       }
     }
   };
 
   if (loading) {
     return <p>Cargando checkout...</p>;
-  }
-
-  if (error && !cart) {
-    return <p>{error}</p>;
   }
 
   if (!cart || cart.items.length === 0) {

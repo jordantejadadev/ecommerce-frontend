@@ -5,6 +5,7 @@ import {
   updateCategory,
   deleteCategory,
 } from "../services/categoryService";
+import { toast } from "sonner";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -20,8 +21,7 @@ export default function AdminCategories() {
         const data = await getCategories();
         setCategories(data);
       } catch (error) {
-        console.error(error);
-        setError("No se pudieron cargar las categorias");
+        toast.error("No se pudieron cargar las categorias");
       } finally {
         setLoading(false);
       }
@@ -32,13 +32,13 @@ export default function AdminCategories() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
       if (editingCategory) {
         const updatedCategory = await updateCategory(editingCategory.id, {
           name,
         });
+        toast.success("Categoria actualizada");
 
         setCategories(
           categories.map((category) =>
@@ -47,6 +47,7 @@ export default function AdminCategories() {
         );
       } else {
         const newCategory = await createCategory({ name });
+        toast.success("Categoría creada");
 
         setCategories((category) => [...category, newCategory]);
       }
@@ -54,9 +55,7 @@ export default function AdminCategories() {
       setEditingCategory(null);
       setName("");
     } catch (error) {
-      console.error(error);
-
-      setError(
+      toast.error(
         error.response?.data?.message || "No se pudo guardar la categoría",
       );
     }
@@ -65,7 +64,6 @@ export default function AdminCategories() {
   const handleEdit = (category) => {
     setEditingCategory(category);
     setName(category.name);
-    setError("");
   };
 
   const handleDelete = async (id) => {
@@ -73,8 +71,7 @@ export default function AdminCategories() {
       await deleteCategory(id);
       setCategories(categories.filter((category) => category.id != id));
     } catch (error) {
-      console.error(error);
-      setError(
+      toast.error(
         error.response?.data?.message || "No se pudo eliminar la categoría",
       );
     }
@@ -83,7 +80,6 @@ export default function AdminCategories() {
   const handleCancelEdit = () => {
     setEditingCategory(null);
     setName("");
-    setError("");
   };
 
   if (loading) {
@@ -100,12 +96,6 @@ export default function AdminCategories() {
         <h1 className="mb-8 text-3xl font-bold text-gray-800">
           Administrar categorías
         </h1>
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-red-700">
-            {error}
-          </div>
-        )}
 
         <div className="grid gap-8 md:grid-cols-2">
           {/* Formulario */}

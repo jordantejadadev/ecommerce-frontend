@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { getAddresses, createAddress } from "../services/addressService";
+import { toast } from "sonner";
 
 export default function Addresses() {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
     street: "",
@@ -21,8 +20,7 @@ export default function Addresses() {
         const data = await getAddresses();
         setAddresses(data);
       } catch (error) {
-        console.error(error);
-        setError("No se pudieron cargar las direcciones");
+        toast.error("No se pudieron cargar las direcciones");
       } finally {
         setLoading(false);
       }
@@ -42,9 +40,6 @@ export default function Addresses() {
     e.preventDefault();
 
     try {
-      setError("");
-      setMessage("");
-
       const newAddress = await createAddress(form);
 
       setAddresses([...addresses, newAddress]);
@@ -57,20 +52,11 @@ export default function Addresses() {
         country: "",
       });
 
-      setMessage("Dirección agregada correctamente");
+      toast.success("Dirección agregada correctamente");
     } catch (error) {
-      console.error(error);
-      setError("No se puede crear la dirección");
+      toast.error("No se puede crear la dirección");
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
-        <p className="text-gray-600">Cargando direcciones...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex-1 px-4 py-10">
@@ -78,18 +64,6 @@ export default function Addresses() {
         <h1 className="mb-8 text-3xl font-bold text-gray-800">
           Mis direcciones
         </h1>
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-6 rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-green-700">
-            {message}
-          </div>
-        )}
 
         <div className="grid gap-8 md:grid-cols-2">
           {/* Direcciones existentes */}
@@ -99,7 +73,20 @@ export default function Addresses() {
             </h2>
 
             {loading ? (
-              <p className="text-gray-500">Cargando direcciones...</p>
+              /* Skeleton para la lista de direcciones */
+              <div className="animate-pulse space-y-4">
+                {[1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="space-y-2 rounded-lg border border-gray-200 p-4"
+                  >
+                    <div className="h-5 w-3/4 rounded bg-gray-200" />
+                    <div className="h-4 w-1/2 rounded bg-gray-200" />
+                    <div className="h-4 w-1/4 rounded bg-gray-200" />
+                    <div className="h-4 w-1/3 rounded bg-gray-200" />
+                  </div>
+                ))}
+              </div>
             ) : addresses.length === 0 ? (
               <p className="text-gray-500">No tienes direcciones guardadas</p>
             ) : (
@@ -143,7 +130,8 @@ export default function Addresses() {
                   value={form.street}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  disabled={loading}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -160,7 +148,8 @@ export default function Addresses() {
                   value={form.city}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  disabled={loading}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -177,7 +166,8 @@ export default function Addresses() {
                   value={form.state}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  disabled={loading}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -194,7 +184,8 @@ export default function Addresses() {
                   value={form.postalCode}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  disabled={loading}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
               <div>
@@ -211,12 +202,14 @@ export default function Addresses() {
                   value={form.country}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  disabled={loading}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full rounded-lg bg-black py-3 font-semibold text-white transition hover:bg-gray-800 cursor-pointer"
+                disabled={loading}
+                className="w-full rounded-lg bg-black py-3 font-semibold text-white transition hover:bg-gray-800 cursor-pointer disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
               >
                 Agregar dirección
               </button>

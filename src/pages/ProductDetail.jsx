@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProductById } from "../services/productService";
 import { addProductToCart } from "../services/cartService";
 import { useAuth } from "../context/AuthContext";
+import ProductGallery from "../components/ProductGallery";
+import { toast } from "sonner";
 
 export default function ProductDetail() {
   const { productId } = useParams();
@@ -46,159 +48,140 @@ export default function ProductDetail() {
     try {
       setAdding(true);
       await addProductToCart(product.id, quantity);
-      alert("Producto agregado al carrito");
+      toast.success("Producto agregado al carrito");
     } catch (error) {
       if (error.response?.status === 400) {
-        alert(error.response.data.message);
+        toast.error(error.response.data.message);
       } else {
-        alert("No se pudo agregar el producto");
+        toast.error("No se pudo agregar el producto");
       }
     } finally {
       setAdding(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex-1 px-6 py-10">
-        <div className="mx-auto max-w-6xl animate-pulse">
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div className="h-[450px] rounded-xl bg-gray-200" />
-            <div className="space-y-4">
-              <div className="h-8 w-3/4 rounded bg-gray-200" />
-              <div className="h-5 w-1/3 rounded bg-gray-200" />
-              <div className="h-24 w-full rounded bg-gray-200" />
-              <div className="h-10 w-1/2 rounded bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
-        <p className="text-gray-600">{error || "Producto no encontrado"}</p>
-        <Link
-          to="/products"
-          className="mt-4 font-medium text-blue-600 hover:underline"
-        >
-          Volver a productos
-        </Link>
-      </div>
-    );
-  }
-
-  const outOfStock = product.stock === 0;
+  const outOfStock = product?.stock === 0;
 
   return (
     <div className="flex-1 px-6 py-10">
       <div className="mx-auto max-w-6xl">
-        {/* Breadcrumb simple */}
-        <nav className="mb-6 text-sm text-gray-500">
-          <Link to="/products" className="hover:text-gray-700">
-            Productos
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-700">{product.name}</span>
-        </nav>
-
-        <div className="grid gap-10 lg:grid-cols-2">
-          {/* Vitrina de imagen (espacio ya listo para múltiples imágenes después) */}
-          <div>
-            <div className="overflow-hidden rounded-xl bg-white shadow-md">
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="h-[450px] w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-[450px] w-full items-center justify-center bg-gray-100 text-gray-400">
-                  Sin imagen
-                </div>
-              )}
+        {loading ? (
+          <div className="grid animate-pulse gap-10 lg:grid-cols-2">
+            <div className="h-[450px] rounded-xl bg-gray-200">
+              <div className="space-y-4">
+                <div className="h-8 w-3/4 rounded bg-gray-200" />
+                <div className="h-5 w-1/3 rounded bg-gray-200" />
+                <div className="h-24 w-full rounded bg-gray-200" />
+                <div className="h-10 w-1/3 rounded bg-gray-200" />
+              </div>
             </div>
           </div>
-
-          {/* Info del producto */}
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-
-            <p className="mt-3 text-3xl font-bold text-gray-900">
-              S/. {product.price}
-            </p>
-
-            <p
-              className={`mt-2 text-sm font-medium ${
-                outOfStock ? "text-red-600" : "text-green-600"
-              }`}
+        ) : error || !product ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-gray-600">{error || "Producto no encontrado"}</p>
+            <Link
+              to="/products"
+              className="mt-4 font-medium text-blue-600 hover:underline"
             >
-              {outOfStock ? "Sin stock" : `${product.stock} disponibles`}
-            </p>
+              Volver a productos
+            </Link>
+          </div>
+        ) : (
+          <>
+            <nav className="mb-6 text-sm text-gray-500">
+              <Link to="/products" className="hover:text-gray-700">
+                Productos
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-gray-700">{product.name}</span>
+            </nav>
 
-            <p className="mt-6 leading-relaxed text-gray-600">
-              {product.description}
-            </p>
+            <div className="grid gap-10 lg:grid-cols-2">
+              <ProductGallery
+                mainImage={product.imageUrl}
+                images={product.images}
+              />
 
-            {!outOfStock && (
-              <div className="mt-8">
-                <p className="mb-2 text-sm font-medium text-gray-700">
-                  Cantidad
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {product.name}
+                </h1>
+
+                <p className="mt-3 text-3xl font-bold text-gray-900">
+                  S/. {product.price}
                 </p>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
-                    className="h-10 w-10 rounded-lg border border-gray-300 text-lg font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-40"
-                  >
-                    −
-                  </button>
+                <p
+                  className={`mt-2 text-sm font-medium ${
+                    outOfStock ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {outOfStock ? "Sin stock" : `${product.stock} disponibles`}
+                </p>
 
-                  <span className="w-10 text-center text-lg font-medium">
-                    {quantity}
-                  </span>
+                <p className="mt-6 leading-relaxed text-gray-600">
+                  {product.description}
+                </p>
 
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= product.stock}
-                    className="h-10 w-10 rounded-lg border border-gray-300 text-lg font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-40"
-                  >
-                    +
-                  </button>
+                {!outOfStock && (
+                  <div className="mt-8">
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Cantidad
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleQuantityChange(-1)}
+                        disabled={quantity <= 1}
+                        className="h-10 w-10 rounded-lg border border-gray-300 text-lg font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-40"
+                      >
+                        −
+                      </button>
+
+                      <span className="w-10 text-center text-lg font-medium">
+                        {quantity}
+                      </span>
+
+                      <button
+                        onClick={() => handleQuantityChange(1)}
+                        disabled={quantity >= product.stock}
+                        className="h-10 w-10 rounded-lg border border-gray-300 text-lg font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-40"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-8">
+                  {outOfStock ? (
+                    <button
+                      disabled
+                      className="w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-3 font-medium text-gray-500"
+                    >
+                      Sin stock
+                    </button>
+                  ) : user ? (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={adding}
+                      className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                    >
+                      {adding ? "Agregando..." : "Agregar al carrito"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-100 cursor-pointer"
+                    >
+                      Iniciar sesión para comprar
+                    </button>
+                  )}
                 </div>
               </div>
-            )}
-
-            <div className="mt-8">
-              {outOfStock ? (
-                <button
-                  disabled
-                  className="w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-3 font-medium text-gray-500"
-                >
-                  Sin stock
-                </button>
-              ) : user ? (
-                <button
-                  onClick={handleAddToCart}
-                  disabled={adding}
-                  className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-800 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {adding ? "Agregando..." : "Agregar al carrito"}
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/login")}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-100 cursor-pointer"
-                >
-                  Iniciar sesión para comprar
-                </button>
-              )}
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

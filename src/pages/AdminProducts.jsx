@@ -7,6 +7,9 @@ import {
   uploadProductImage,
 } from "../services/productService";
 import { getCategories } from "../services/categoryService";
+import { toast } from "sonner";
+import axios from "axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -34,7 +37,10 @@ export default function AdminProducts() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+
+  const [imageFiles, setImageFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,25 +51,34 @@ export default function AdminProducts() {
       try {
         setError("");
 
-        const [productsData, categoriesData] = await Promise.all([
-          getProducts({ page, limit, signal: controller.signal }),
-          getCategories(),
-        ]);
+        if (categories.length === 0) {
+          const categoriesData = await getCategories({
+            signal: controller.signal,
+          });
+          setCategories(categoriesData);
+        }
 
+        const productsData = await getProducts({
+          page,
+          limit,
+          signal: controller.signal,
+        });
         setProducts(productsData.content);
         setPagination({
           totalPages: productsData.totalPages,
           first: productsData.first,
           last: productsData.last,
         });
-        setCategories(categoriesData);
       } catch (error) {
-        // if (!axios.isCancel(error)) {
-        //   setError("No se pudieron cargar los datos");
-        // }
+        if (!error.name === "AbortError" && !axios.isCancel(error)) {
+          setError("No se pudieron cargar los datos");
+          toast.error("No se pudieron cargar los datos");
+        }
       } finally {
-        setLoading(false);
-        setIsFetching(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+          setIsFetching(false);
+        }
       }
     };
 
@@ -103,52 +118,54 @@ export default function AdminProducts() {
 
     setEditingId(null);
     setImageFile(null);
+    setImageFiles([]);
+    setExistingImages([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      setError("");
-      setMessage("");
-
       let imageUrl = form.imageUrl;
 
       if (imageFile) {
         setUploading(true);
         imageUrl = await uploadProductImage(imageFile);
-        setUploading(false);
       }
+
+      // Sube todas las imágenes nuevas de la vitrina, en paralelo
+      const newImageUrls = await Promise.all(
+        imageFiles.map((file) => uploadProductImage(file)),
+      );
+
+      setUploading(false);
 
       const productData = {
         ...form,
         imageUrl,
+        images: [...existingImages, ...newImageUrls],
         price: Number(form.price),
         stock: Number(form.stock),
       };
 
       if (editingId) {
         const updatedProduct = await updateProduct(editingId, productData);
-
         setProducts((prev) =>
           prev.map((product) =>
             product.id === editingId ? updatedProduct : product,
           ),
         );
-
-        setMessage("Producto actualizado correctamente");
+        toast.success("Producto actualizaddo correctamente");
       } else {
         const newProduct = await createProduct(productData);
-
         setProducts((prev) => [...prev, newProduct]);
-
-        setMessage("Producto creado correctamente");
+        toast.success("Producto creado correctamente");
       }
 
       resetForm();
     } catch (error) {
       setUploading(false);
-      setError(
+      toast.error(
         error.response?.data?.message || "No se pudo guardar el producto",
       );
     }
@@ -166,53 +183,35 @@ export default function AdminProducts() {
       categoryId: product.categoryId || "",
     });
 
-    setMessage("");
-    setError("");
+    setExistingImages(product.images || []);
+    setImageFiles([]);
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "¿Seguro que deseas eliminar este producto?",
-    );
+  const handleDelete = (id) => {
+    setPendingDeleteId(id);
+  };
 
-    if (!confirmed) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
-      setError("");
-      setMessage("");
-
-      await deleteProduct(id);
-
-      setProducts((prev) => prev.filter((product) => product.id !== id));
-
-      setMessage("Producto eliminado correctamente");
+      await deleteProduct(pendingDeleteId);
+      setProducts((prev) =>
+        prev.filter((product) => product.id !== pendingDeleteId),
+      );
+      toast.success("Producto eliminado correctamente");
     } catch (error) {
-      setError(
+      toast.error(
         error.response?.data?.message || "No se pudo eliminar el producto",
       );
+    } finally {
+      setPendingDeleteId(null);
     }
   };
-
   return (
     <div className="flex-1 px-4 py-8">
       <div className="mx-auto max-w-7xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-800">
           Administración de productos
         </h1>
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-6 rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-green-700">
-            {message}
-          </div>
-        )}
 
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Formulario */}
@@ -332,6 +331,56 @@ export default function AdminProducts() {
 
               <div>
                 <label
+                  htmlFor="imageFiles"
+                  className="mb-1 block text-sm font-medium text-gray-700"
+                >
+                  Imágenes adicionales (vitrina)
+                </label>
+
+                <input
+                  id="imageFiles"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => setImageFiles(Array.from(e.target.files))}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                />
+
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {existingImages.map((url, i) => (
+                    <div key={i} className="relative">
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-16 w-16 rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExistingImages((prev) =>
+                            prev.filter((_, idx) => idx !== i),
+                          )
+                        }
+                        className="absolute -right-1 -top-1 h-5 w-5 rounded-full bg-red-500 text-xs text-white cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+
+                  {imageFiles.map((file, i) => (
+                    <img
+                      key={i}
+                      src={URL.createObjectURL(file)}
+                      alt=""
+                      className="h-16 w-16 rounded-lg object-cover opacity-70"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label
                   htmlFor="categoryId"
                   className="mb-1 block text-sm font-medium text-gray-700"
                 >
@@ -393,12 +442,50 @@ export default function AdminProducts() {
             </div>
 
             {loading ? (
-              <p className="text-gray-500">Cargando productos...</p>
-            ) : products.length === 0 ? (
-              <p className="text-gray-500">No hay productos registrados.</p>
-            ) : (
               <>
-                {/* El contenedor flex-1 empuja el paginador hacia abajo cuando hay pocos elementos */}
+                <div className="flex-1 space-y-4 animate-pulse">
+                  <div className="flex-1 space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col gap-4 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="flex min-w-0 items-center gap-4">
+                          <div className="h-16 w-16 shrink-0 rounded-lg bg-gray-200" />
+
+                          <div className="space-y-2">
+                            <div className="h-5 w-40 rounded bg-gray-200" />
+
+                            <div className="h-4 w-24 rounded bg-gray-200" />
+
+                            <div className="flex gap-3">
+                              <div className="h-4 w-16 rounded bg-gray-200" />
+                              <div className="h-4 w-16 rounded bg-gray-200" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <div className="h-9 w-16 rounded-lg bg-gray-200" />
+                          <div className="h-9 w-16 rounded-lg bg-gray-200" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto pt-6 flex items-center justify-center gap-4">
+                    <div className="h-9 w-9 rounded-lg bg-gray-200" />
+
+                    <div className="h-9 w-9 rounded-lg bg-gray-200" />
+                    <div className="h-9 w-9 rounded-lg bg-gray-900" />
+                    <div className="h-9 w-9 rounded-lg bg-gray-200" />
+
+                    <div className="h-9 w-9 rounded-lg bg-gray-200" />
+                  </div>
+                </div>
+              </>
+            ) : products && products.length > 0 ? (
+              <>
                 <div className="flex-1 space-y-4">
                   {products.map((product) => (
                     <div
@@ -459,7 +546,7 @@ export default function AdminProducts() {
                     </div>
                   ))}
                 </div>
-                {/* Paginador anclado con mt-auto */}
+
                 {!loading && !error && pagination.totalPages > 1 && (
                   <div className="mt-auto pt-6 flex items-center justify-center gap-4">
                     <button
@@ -480,10 +567,21 @@ export default function AdminProducts() {
                   </div>
                 )}
               </>
+            ) : (
+              <p className="text-gray-500">No hay productos registradossss.</p>
             )}
           </section>
         </div>
       </div>
+
+      <ConfirmModal
+        open={pendingDeleteId !== null}
+        title="Eliminar Producto"
+        message="¿Seguro que deseas eliminar este producto?"
+        confirmText="Si, eliminar"
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

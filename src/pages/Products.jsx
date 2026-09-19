@@ -3,6 +3,7 @@ import { getProducts } from "../services/productService";
 import { addProductToCart } from "../services/cartService";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -79,14 +80,14 @@ export default function Products() {
   const handleAddToCart = async (productId) => {
     try {
       await addProductToCart(productId, 1);
-      alert("Producto agregado al carrito");
+      toast.success("Producto agregado al carrito");
     } catch (error) {
       console.error(error);
 
       if (error.response?.status === 400) {
-        alert(error.response.data.message);
+        toast.error(error.response.data.message);
       } else {
-        alert("No se pudo agregar el producto");
+        toast.error("No se pudo agregar el producto");
       }
     }
   };
@@ -156,7 +157,7 @@ export default function Products() {
                     {user ? (
                       <button
                         onClick={() => handleAddToCart(product.id)}
-                        className="w-full rounded-lg bg-black px-4 py-2.5 font-medium text-white transition hover:bg-gray-800"
+                        className="w-full rounded-lg bg-black px-4 py-2.5 font-medium text-white transition hover:bg-gray-800 cursor-pointer"
                       >
                         Agregar al carrito
                       </button>

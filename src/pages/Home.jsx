@@ -45,25 +45,7 @@ export default function Home() {
 
   return (
     <div>
-      {/* HERO */}
-      {/* <section className="bg-gray-900 text-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-24">
-          <p className="text-sm font-medium text-blue-400">Nueva temporada</p>
-          <h1 className="max-w-xl text-4xl font-bold leading-tight sm:text-5xl">
-            Todo lo que buscas, a un clic de distancia
-          </h1>
-          <p className="max-w-md text-gray-300">
-            Explora nuestro catálogo y encuentra productos pensados para ti, con
-            envíos rápidos a todo el país
-          </p>
-          <Link
-            to="/products"
-            className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
-          >
-            Ver productos
-          </Link>
-        </div>
-      </section> */}
+      {/* HERO */}     
       <HeroCarousel />
 
       {/* OFERTAS */}
