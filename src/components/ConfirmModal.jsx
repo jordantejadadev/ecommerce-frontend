@@ -5,7 +5,7 @@ export default function ConfirmModal({
   confirmText = "Confirmar",
   cancelText = "Cancelar",
   onConfirm,
-  onCancel,
+  onCancel,  
 }) {
   if (!open) return null;
 

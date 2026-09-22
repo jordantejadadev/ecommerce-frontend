@@ -4,6 +4,8 @@ import { addProductToCart } from "../services/cartService";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import { getCategories } from "../services/categoryService";
+import axios from "axios";
 export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,10 +19,20 @@ export default function Products() {
     first: true,
     last: false,
   });
-  const limit = 4; // Productos por página
+  const size = 4; // Productos por página
+
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState("");
+  const [sort, setSort] = useState("name,asc");
 
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getCategories()
+      .then(setCategories)
+      .catch((err) => console.error("Error al cargar categorías: ", err));
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -29,7 +41,6 @@ export default function Products() {
       try {
         setError("");
 
-        // Skeletons solo en la carga inicial; para cambios de página usamos isFetching
         if (products.length === 0) {
           setLoading(true);
         } else {
@@ -38,21 +49,26 @@ export default function Products() {
 
         const response = await getProducts({
           page,
-          limit,
+          size,
+          categoryId,
+          sort,
           signal: controller.signal,
         });
 
-        setProducts(response.content || response);
+        setProducts(response.content || []);
         setPagination({
           totalPages: response.totalPages,
           first: response.first,
           last: response.last,
         });
       } catch (error) {
-        if (error.name === "CanceledError" || error.name === "AbortError") {
+        // Si la petición fue cancelada intencionalmente, se ignora
+        if (axios.isCancel(error) || controller.signal.aborted) {
           return;
         }
-        console.error(error);
+
+        // Imprime el error real en la consola para depuración
+        console.error("Error al cargar productos:", error);
         setError("No se pudieron cargar los productos");
       } finally {
         if (!controller.signal.aborted) {
@@ -67,7 +83,7 @@ export default function Products() {
     return () => {
       controller.abort();
     };
-  }, [page]);
+  }, [page, categoryId, sort]);
 
   const handlePrev = () => {
     if (!pagination.first && !isFetching) setPage((prev) => prev - 1);
@@ -92,6 +108,16 @@ export default function Products() {
     }
   };
 
+  const handleCategoryChange = (e) => {
+    setCategoryId(e.target.value);
+    setPage(1);
+  };
+
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setPage(1);
+  };
+
   function ProductCardSkeleton() {
     return (
       <div className="overflow-hidden rounded-xl bg-white shadow-md">
@@ -110,6 +136,48 @@ export default function Products() {
     <div className="flex-1 px-6 py-10">
       <div className="mx-auto max-w-7xl">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">Productos</h1>
+
+        <div className="mb-6 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3">
+            <label
+              htmlFor="category"
+              className="text-sm font-medium text-gray-700 whitespace-nowrap"
+            >
+              Category
+            </label>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={handleCategoryChange}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 cursor-pointer"
+            >
+              <option value="">Todas las categorias</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <label htmlFor="sort" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Ordernar por
+            </label>
+            <select
+              name="sort"
+              id="sort"
+              value={sort}
+              onChange={handleSortChange}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 cursor-pointer"
+            >
+              <option value="name,asc">Nombre (A-Z)</option>
+              <option value="name,desc">Nombre (Z-A)</option>
+              <option value="price,asc">Precio: Menor a Mayor</option>
+              <option value="price,desc">Precio: Mayor a Menor</option>
+            </select>
+          </div>
+        </div>
 
         {/* Aplicamos opacidad suave cuando isFetching es true */}
         <div
@@ -181,7 +249,7 @@ export default function Products() {
             <button
               onClick={handlePrev}
               disabled={pagination.first || isFetching}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               Anterior
             </button>
@@ -191,7 +259,7 @@ export default function Products() {
             <button
               onClick={handleNext}
               disabled={pagination.last || isFetching}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             >
               Siguiente
             </button>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getOrderById, cancelOrder } from "../services/orderService";
 import { toast } from "sonner";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function OrderDetail() {
   const { orderId } = useParams();
@@ -9,6 +10,7 @@ export default function OrderDetail() {
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -25,8 +27,13 @@ export default function OrderDetail() {
     loadOrder();
   }, [orderId]);
 
-  const handleCancelOrder = async () => {
+  const handleCancelOrder = () => {
+    setShowCancelModal(true);
+  };
+
+  const confirmCancelOrder = async () => {
     try {
+      setShowCancelModal(false);
       const updatedOrder = await cancelOrder(order.id);
       setOrder(updatedOrder);
       toast.success("Orden cancelada");
@@ -182,6 +189,15 @@ export default function OrderDetail() {
           </>
         )}
       </div>
+
+      <ConfirmModal
+        open={showCancelModal}
+        title="Cancelar orden"
+        message="¿Seguro que deseas cancelar esta orden?"
+        confirmText="Sí, cancelar"
+        onConfirm={confirmCancelOrder}
+        onCancel={() => setShowCancelModal(false)}
+      />
     </div>
   );
 }

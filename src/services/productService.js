@@ -1,12 +1,14 @@
 import api from "../api/axios";
 
-export const getProducts = async ({ page = 1, limit = 2, signal } = {}) => {
+export const getProducts = async ({ page = 1, size = 12, categoryId, sort, signal } = {}) => {
   const response = await api.get("/products", {
     params: {
       page: page - 1,
-      size: limit,
+      size,      
+      ...(categoryId && { categoryId }), // solo lo incluye si hay un valor      
+      sort
     },
-    signal,
+    signal
   });
   return response.data;
 };

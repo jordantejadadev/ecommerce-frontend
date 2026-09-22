@@ -177,7 +177,7 @@ export default function Checkout() {
             <button
               onClick={handleCreateOrder}
               disabled={!selectedAddressId}
-              className="mt-6 w-full rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+              className="mt-6 w-full rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 cursor-pointer"
             >
               Confirmar compra
             </button>

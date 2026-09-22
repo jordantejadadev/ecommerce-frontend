@@ -59,7 +59,15 @@ export default function Navbar() {
                     <Link
                       to="/admin/users"
                       className="text-gray-700 hover:text-black"
-                    >Admin Users</Link>
+                    >
+                      Admin Users
+                    </Link>
+                    <Link
+                      to="/admin/orders"
+                      className="text-gray-700 hover:text-black"
+                    >
+                      Admin Orders
+                    </Link>
                   </>
                 )}
                 <span className="text-sm font-medium text-gray-900">
@@ -68,7 +76,7 @@ export default function Navbar() {
 
                 <button
                   onClick={handleLogout}
-                  className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                  className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 cursor-pointer"
                 >
                   Cerrar sesión
                 </button>
@@ -78,7 +86,7 @@ export default function Navbar() {
             {!user && (
               <Link
                 to="/login"
-                className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 cursor-pointer"
               >
                 Iniciar sesión
               </Link>
@@ -147,6 +155,13 @@ export default function Navbar() {
                         className="text-gray-700 hover:text-black"
                       >
                         Admin Users
+                      </Link>
+                      <Link
+                        to="/admin/orders"
+                        onClick={() => setMenuOpen(false)}
+                        className="text-gray-700 hover:text-black"
+                      >
+                        Admin Orders
                       </Link>
                     </>
                   )}

@@ -6,14 +6,14 @@ import {
   deleteCategory,
 } from "../services/categoryService";
 import { toast } from "sonner";
+import ConfirmModal from "../components/ConfirmModal";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
   const [editingCategory, setEditingCategory] = useState(null);
   const [name, setName] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(null);  
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -66,14 +66,26 @@ export default function AdminCategories() {
     setName(category.name);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id, name) => {
+    setPendingDelete({ id, name });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+
     try {
-      await deleteCategory(id);
-      setCategories(categories.filter((category) => category.id != id));
+      await deleteCategory(pendingDelete.id);
+
+      setCategories((prev) =>
+        prev.filter((category) => category.id !== pendingDelete.id),
+      );
+      toast.success("Categoria eliminada correctamente!");
     } catch (error) {
       toast.error(
         error.response?.data?.message || "No se pudo eliminar la categoría",
       );
+    } finally {
+      setPendingDelete(null);
     }
   };
 
@@ -173,7 +185,7 @@ export default function AdminCategories() {
                       </button>
 
                       <button
-                        onClick={() => handleDelete(category.id)}
+                        onClick={() => handleDelete(category.id, category.name)}
                         className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 cursor-pointer"
                       >
                         Eliminar
@@ -186,6 +198,15 @@ export default function AdminCategories() {
           </section>
         </div>
       </div>
+
+      <ConfirmModal
+        open={pendingDelete !== null}
+        title="Eliminar categoria"
+        message={`¿Desea eliminar la categoria ${pendingDelete?.name}?`}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+        confirmText="Si, eliminar"
+      />
     </div>
   );
 }
