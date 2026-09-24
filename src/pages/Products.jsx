@@ -56,11 +56,16 @@ export default function Products() {
         });
 
         setProducts(response.content || []);
+        const totalPages = response.page?.totalPages ?? 0;
+        const currentPage = response.page?.number ?? 0;
+        console.log(response);
+
         setPagination({
-          totalPages: response.totalPages,
-          first: response.first,
-          last: response.last,
+          totalPages: totalPages,
+          first: currentPage === 0,
+          last: totalPages === 0 || currentPage + 1 >= totalPages,
         });
+        
       } catch (error) {
         // Si la petición fue cancelada intencionalmente, se ignora
         if (axios.isCancel(error) || controller.signal.aborted) {
@@ -161,7 +166,10 @@ export default function Products() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label htmlFor="sort" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <label
+              htmlFor="sort"
+              className="text-sm font-medium text-gray-700 whitespace-nowrap"
+            >
               Ordernar por
             </label>
             <select
