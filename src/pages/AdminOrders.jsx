@@ -64,7 +64,35 @@ export default function AdminOrders() {
 
         <section className="rounded-xl bg-white p-6 shadow-md">
           {loading ? (
-            <p className="text-gray-500">Cargando órdenes</p>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-lg border border-gray-200 p-4 animate-pulse"
+                >
+                  {/* Fila principal de datos */}
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                    <div className="space-y-2">
+                      <div className="h-4 w-48 rounded bg-gray-200" />
+                      <div className="h-3 w-64 rounded bg-gray-200" />
+                      <div className="h-3 w-36 rounded bg-gray-200" />
+                    </div>
+
+                    {/* Columna con Status (Badge) y Total */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-7 w-24 rounded-full bg-gray-200" />
+                      <div className="h-4 w-20 rounded bg-gray-200" />
+                    </div>
+                  </div>
+
+                  {/* Botones de acción opcionales */}
+                  <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
+                    <div className="h-8 w-36 rounded-lg bg-gray-200" />
+                    <div className="h-8 w-36 rounded-lg bg-gray-200" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : orders.length === 0 ? (
             <p className="text-gray-500">No hay órdenes registradas</p>
           ) : (

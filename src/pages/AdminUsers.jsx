@@ -52,7 +52,7 @@ export default function AdminUsers() {
     } finally {
       setUpdatingId(null);
     }
-  };  
+  };
   //   const confirmed = window.confirm(
   //     `¿Seguro que deseas cambiar este usuario a ${newRole}?`,
   //   );
@@ -91,7 +91,28 @@ export default function AdminUsers() {
           <h2 className="mb-5 text-xl font-semibold text-gray-800">Usuarios</h2>
 
           {loading ? (
-            <p className="text-gray-500">Cargando usuarios...</p>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((item) => (
+                <div
+                  key={item}
+                  className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between animate-pulse"
+                >
+                  <div className="flex flex-col justify-center gap-1.5 py-0.5">
+                    <div className="h-4.5 w-36 rounded bg-gray-200" />{" "}
+                    {/* Reemplaza al h3 (20px) */}
+                    <div className="h-3.5 w-48 rounded bg-gray-200" />{" "}
+                    {/* Reemplaza al p.text-sm (14px) */}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="h-7 w-16 rounded-full bg-gray-200" />{" "}
+                    {/* Badge */}
+                    <div className="h-9 w-28 rounded-lg bg-gray-200" />{" "}
+                    {/* Botón */}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : users.length === 0 ? (
             <p className="text-gray-500">No hay usuarios registrados.</p>
           ) : (
