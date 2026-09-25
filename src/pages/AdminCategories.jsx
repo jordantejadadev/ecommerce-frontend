@@ -13,7 +13,7 @@ export default function AdminCategories() {
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState(null);
   const [name, setName] = useState("");
-  const [pendingDelete, setPendingDelete] = useState(null);  
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -94,14 +94,6 @@ export default function AdminCategories() {
     setName("");
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-1 justify-center items-center px-6 py-10">
-        <p className="text-gray-600">Cargando categorías...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 px-6 py-10">
       <div className="mx-auto max-w-5xl">
@@ -163,8 +155,26 @@ export default function AdminCategories() {
               Categorías
             </h2>
 
-            {categories.length === 0 ? (
-              <p className="text-gray-500">No hay categorías registradas.</p>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between animate-pulse"
+                  >
+                    {/* Skeleton del título (category.name) */}
+                    <div className="h-5 w-40 rounded-md bg-gray-200" />
+
+                    {/* Skeleton de los botones */}
+                    <div className="flex gap-2">
+                      {/* Botón Editar */}
+                      <div className="h-9 w-20 rounded-lg bg-gray-200" />
+                      {/* Botón Eliminar */}
+                      <div className="h-9 w-20 rounded-lg bg-gray-200" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <div className="space-y-3">
                 {categories.map((category) => (
